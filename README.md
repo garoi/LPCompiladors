@@ -1,1 +1,1 @@
-Compilador para interpretar la comanda de compres
+Compilador para interpretar una comanda de compras

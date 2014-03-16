@@ -2,6 +2,7 @@
 <<
 #include <string>
 #include <iostream>
+#include "stdlib.h"
 #include <map>
 using namespace std;
 
@@ -10,6 +11,7 @@ typedef struct {
   string kind;
   string text;
 } Attrib;
+
 
 // function to fill token information (predeclaration)
 void zzcr_attr(Attrib *attr, int type, char *text);
@@ -27,10 +29,10 @@ AST* createASTnode(Attrib* attr, int ttype, char *textt);
 #include <cstdlib>
 #include <cmath>
 
-//global structures
-map<string,bool> block;
 AST *root;
 
+typedef map<string, int>quantProductes;
+map<string, quantProductes>llistaCompra;
 
 // function to fill token information
 void zzcr_attr(Attrib *attr, int type, char *text) {
@@ -47,9 +49,9 @@ void zzcr_attr(Attrib *attr, int type, char *text) {
 // function to create a new AST node
 AST* createASTnode(Attrib* attr, int type, char* text) {
   AST* as = new AST;
-  as->kind = attr->kind; 
+  as->kind = attr->kind;
   as->text = attr->text;
-  as->right = NULL; 
+  as->right = NULL;
   as->down = NULL;
   return as;
 }
@@ -64,6 +66,7 @@ AST* createASTlist(AST *child) {
  return as;
 }
 
+//donat un nom de compra, retorna l'arbre on esta definida
 AST *findASTCompraDef(string id) {
   AST *n = root->down;
   while (n != NULL and (n->kind != "=" or n->down->text != id)) n = n->right;
@@ -78,8 +81,6 @@ AST *c=a->down;
 for (int i=0; c!=NULL && i<n; i++) c=c->right;
 return c;
 }
-
-
 
 /// print AST, recursively, with indentation
 void ASTPrintIndent(AST *a,string s)
@@ -96,7 +97,7 @@ void ASTPrintIndent(AST *a,string s)
     ASTPrintIndent(i,s+"  |"+string(i->kind.size()+i->text.size(),' '));
     i=i->right;
   }
-  
+
   if (i!=NULL) {
       cout<<s+"  \\__";
       ASTPrintIndent(i,s+"   "+string(i->kind.size()+i->text.size(),' '));
@@ -104,7 +105,7 @@ void ASTPrintIndent(AST *a,string s)
   }
 }
 
-/// print AST 
+/// print AST
 void ASTPrint(AST *a)
 {
   while (a!=NULL) {
@@ -114,18 +115,300 @@ void ASTPrint(AST *a)
   }
 }
 
+//-------------------------------------------------------------------------------------------
+//EL MEU CODI
+int unitats(AST *a) {
+    //string s = computa(findASTCompraDef(child(a,2)->kind)->down);
+}
+
+double stdev(AST *a) {
+
+}
+
+int productes(AST *a) {
+}
+
+/*Imprimeix el vector
+map<string, quantProductes>::iterator i = llistaCompra.begin();
+for (; i != llistaCompra.end(); ++i) {
+  quantProductes productesCompra;
+  productesCompra = (*i).second;
+  cout << (*i).first << endl;
+  quantProductes::iterator it = productesCompra.begin();
+  for (; it != productesCompra.end(); ++it) {
+    cout << (*it).first << " " << (*it).second << endl;
+  }
+}*/
+
+void assignacio(AST *a, quantProductes& productesCompra) {
+  productesCompra[a->down->text] = atoi(a->kind.c_str());
+  if (a->right == NULL) return;
+  else assignacio(a->right, productesCompra);
+}
+
+quantProductes minusOperacio(AST *a, AST *b) {
+  quantProductes res;
+  map<string, quantProductes>::iterator it = llistaCompra.find(a->text);
+  quantProductes productesCompra1 = (*it).second;
+  it = llistaCompra.find(b->text);
+  quantProductes productesCompra2 = (*it).second;
+
+  quantProductes::iterator it1 = productesCompra1.begin();
+  quantProductes::iterator it2 = productesCompra2.begin();
+
+  res.insert(productesCompra1.begin(), productesCompra1.end());
+  res.insert(productesCompra2.begin(), productesCompra2.end());
+  if (productesCompra1.size() > productesCompra2.size()) {
+    while (it1 != productesCompra1.end()) {
+      it2 = productesCompra2.find((*it1).first);
+      if (it2 != productesCompra2.end()) {
+        res[(*it1).first] = (*it1).second - (*it2).second;
+      }
+      ++it1;
+    }
+  }
+  else {
+    while (it2 != productesCompra2.end()) {
+      it1 = productesCompra1.find((*it2).first);
+      if (it1 != productesCompra1.end()) {
+        res[(*it2).first] = (*it1).second - (*it2).second;
+      }
+      ++it2;
+    }
+  }
+  return res;
+}
+
+quantProductes minusOperacioRes(AST *a, quantProductes& res) {
+  map<string, quantProductes>::iterator it = llistaCompra.find(a->text);
+  quantProductes productesCompra1 = (*it).second;
+
+  quantProductes::iterator it1 = productesCompra1.begin();
+  quantProductes::iterator it2 = res.begin();
+
+  if (productesCompra1.size() > res.size()) {
+    while (it1 != productesCompra1.end()) {
+      it2 = res.find((*it1).first);
+      if (it2 != res.end()) {
+        res[(*it1).first] = (*it1).second - (*it2).second;
+      }
+      ++it1;
+    }
+  }
+  else {
+    while (it2 != res.end()) {
+      it1 = productesCompra1.find((*it2).first);
+      if (it1 != productesCompra1.end()) {
+        res[(*it2).first] = (*it1).second - (*it2).second;
+        if (res[(*it2).first] < 0) res[(*it2).first] *= -1;
+      }
+      ++it2;
+    }
+  }
+  // res.insert(productesCompra1.begin(), productesCompra1.end());
+  return res;
+}
+
+quantProductes andOperacio(AST *a, AST *b) {
+  quantProductes res;
+  map<string, quantProductes>::iterator it = llistaCompra.find(a->text);
+  quantProductes productesCompra1 = (*it).second;
+  it = llistaCompra.find(b->text);
+  quantProductes productesCompra2 = (*it).second;
+
+  quantProductes::iterator it1 = productesCompra1.begin();
+  quantProductes::iterator it2 = productesCompra2.begin();
+
+  res.insert(productesCompra1.begin(), productesCompra1.end());
+  res.insert(productesCompra2.begin(), productesCompra2.end());
+  if (productesCompra1.size() > productesCompra2.size()) {
+    while (it1 != productesCompra1.end()) {
+      it2 = productesCompra2.find((*it1).first);
+      if (it2 != productesCompra2.end()) {
+        res[(*it1).first] = (*it1).second + (*it2).second;
+      }
+      else res[(*it1).first] = (*it1).second;
+      ++it1;
+    }
+  }
+  else {
+    while (it2 != productesCompra2.end()) {
+      it1 = productesCompra1.find((*it2).first);
+      if (it1 != productesCompra1.end()) {
+        res[(*it2).first] = (*it1).second + (*it2).second;
+      }
+      else res[(*it2).first] = (*it2).second;
+      ++it2;
+    }
+  }
+
+  return res;
+}
+
+quantProductes andOperacioRes(AST *a, quantProductes& res) {
+  map<string, quantProductes>::iterator it = llistaCompra.find(a->text);
+  quantProductes productesCompra1 = (*it).second;
+
+  quantProductes::iterator it1 = productesCompra1.begin();
+  quantProductes::iterator it2 = res.begin();
+
+  if (productesCompra1.size() > res.size()) {
+    while (it1 != productesCompra1.end()) {
+      it2 = res.find((*it1).first);
+      if (it2 != res.end()) {
+        res[(*it1).first] = (*it1).second + (*it2).second;
+      }
+      else res[(*it1).first] = (*it1).second;
+      ++it1;
+    }
+  }
+  else {
+    while (it2 != res.end()) {
+      it1 = productesCompra1.find((*it2).first);
+      if (it1 != productesCompra1.end()) {
+        res[(*it2).first] = (*it1).second + (*it2).second;
+      }
+      ++it2;
+    }
+  }
+  res.insert(productesCompra1.begin(), productesCompra1.end());
+  return res;
+}
+
+quantProductes multOperacio(AST *a, AST *b) {
+  quantProductes res;
+  map<string, quantProductes>::iterator it = llistaCompra.find(b->text);
+  quantProductes productesCompra1 = (*it).second;
+  int val =  atoi(a->kind.c_str());
+  quantProductes::iterator it1 = productesCompra1.begin();
+  while (it1 != productesCompra1.end()) {
+    res[(*it1).first] = (*it1).second * val;
+    ++it1;
+  }
+  return res;
+}
+
+quantProductes multOperacioRes(AST *a, quantProductes& res) {
+  int val =  atoi(a->kind.c_str());
+  quantProductes::iterator it1 = res.begin();
+  while (it1 != res.end()) {
+    res[(*it1).first] = (*it1).second * val;
+    ++it1;
+  }
+  return res;
+}
+
+void operacio(AST *a, quantProductes& res) {
+  if (a->right == NULL and a->down == NULL) return;
+  else if (a->right != NULL and a->down != NULL) {
+    operacio(child(a, 0), res);
+  }
+  else if (a->right == NULL and a->down != NULL) {
+    operacio(child(a, 0), res);
+  }
+  else if (a->right != NULL and a->down == NULL) {
+    operacio(a->right, res);
+  }
+  if (a->kind == "*") {
+    if (res.size() > 0) res = multOperacioRes(child(a, 0), res);
+    else res = multOperacio(child(a,0), child(a,1));
+  }
+  else if (a->kind == "MINUS") {
+    if (res.size() > 0) {
+      if (a->down->kind == "id") res = andOperacioRes(child(a, 0), res);
+      else res = minusOperacioRes(child(a, 1), res);
+    }
+    else res = minusOperacio(child(a,0), child(a,1));
+  }
+  else if (a->kind == "AND") {
+    if (res.size() > 0) {
+      if (a->down->kind == "id") res = andOperacioRes(child(a, 0), res);
+      else{cout<<"aKIIIIIIIII"<<endl; res = andOperacioRes(child(a, 1), res);}
+    }
+    else res = andOperacio(child(a,0), child(a,1));
+  }
+}
+
+void evaluar(AST *a) {
+  //Busco a->text que es el co= al map, si existeix, borro el submap, sino recorro el abre afeigint
+  if (a->right != NULL) {
+    if (a->right->kind == "[") {
+      if (llistaCompra.find(a->text) != llistaCompra.end()) {
+        llistaCompra.erase(llistaCompra.find(a->text));
+      }
+      quantProductes productesCompra;
+      assignacio(child(a->right, 0), productesCompra);
+      llistaCompra[a->text] = productesCompra;
+    }
+    else {
+      quantProductes res;
+      operacio(a->right, res);
+      llistaCompra[a->text] = res;
+    }
+  }
+  else evaluar(child(a,0));
+}
+
+void mirarArbre(AST *a) {
+  if (a == NULL) return;
+  else if (a->kind == "PRODUCTES") productes(a->right->down);
+  else if (a->kind == "UNITATS") unitats(a->right->down);
+  else if (a->kind == "DESVIACIO") stdev(a->right->down);
+  else if (a->kind == "=") evaluar(child(a,0));
+  mirarArbre(a->right);
+}
+
+//Fi del meu codi
+//-------------------------------------------------------------------------------------------
+
 int main() {
   root = NULL;
   ANTLR(compres(&root), stdin);
   ASTPrint(root);
+  mirarArbre(root->down);
+cout << "------------------------"<<endl;
+map<string, quantProductes>::iterator i = llistaCompra.begin();
+for (; i != llistaCompra.end(); ++i) {
+  quantProductes productesCompra;
+  productesCompra = (*i).second;
+  cout << (*i).first << endl;
+  quantProductes::iterator it = productesCompra.begin();
+  for (; it != productesCompra.end(); ++it) {
+    cout << (*it).first << " " << (*it).second << endl;
+  }
+  cout << "------------------------"<<endl;
+}
 }
 >>
 
 #lexclass START
-#token ID "[a-zA-Z][a-zA-Z0-9]*"
 #token SPACE "[\ \n]" << zzskip();>>
+#token NUM "[0-9]+"
+#token PARO "\("
+#token PART "\)"
+#token CLAUO "\["
+#token CLAUT "\]"
+#token COMA "\,"
+#token ASSIG "="
+#token MULT "\*"
+#token MINUS "MINUS"
+#token AND "AND"
+#token UNITATS "UNITATS"
+#token DESVIACIO "DESVIACIO"
+#token PRODUCTES "PRODUCTES"
+#token ID "[a-zA-Z]+[0-9]*"
 
 compres: (opers)* <<#0=createASTlist(_sibling);>> ;
 
+opers: ID ASSIG^ aval | resultat;
 
+aval: definicio | operacio;
+
+operacio: operacio2 ((AND^ | MINUS^) operacio2)*;
+operacio2: NUM MULT^ (ID | PARO! operacio PART!) | ID | PARO! operacio PART!;
+
+definicio: (CLAUO^ llista2 (COMA! llista2)* CLAUT!);
+llista2: PARO! NUM^ COMA! ID PART!;
+
+resultat: (UNITATS^ | DESVIACIO^ | PRODUCTES^) ID;
 
