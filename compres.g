@@ -117,28 +117,51 @@ void ASTPrint(AST *a)
 
 //-------------------------------------------------------------------------------------------
 //EL MEU CODI
-int unitats(AST *a) {
-    //string s = computa(findASTCompraDef(child(a,2)->kind)->down);
+int unitats(AST *a, bool imp) {
+  if (imp) cout << endl << "en nombre d'unitats de la " << a->text  << " es: ";
+  map<string, quantProductes>::iterator i = llistaCompra.find(a->text);
+  quantProductes sortida = (*i).second;
+  quantProductes::iterator it = sortida.begin();
+  int cont = 0;
+  while (it != sortida.end()) {
+    if ((*it).second > 0) cont += (*it).second;
+    ++it;
+  }
+  if (imp) cout << cont << endl;
+  return cont;
+}
+
+int productes(AST *a, bool imp) {
+  if (imp) cout << endl << "els productes de la " << a->text  << " son:" << endl;
+  map<string, quantProductes>::iterator i = llistaCompra.find(a->text);
+  quantProductes sortida = (*i).second;
+  quantProductes::iterator it = sortida.begin();
+  int cont = 0;
+  while (it != sortida.end()) {
+    if ((*it).second > 0) {
+      if (imp) cout << (*it).first << " " << (*it).second << endl;
+      ++cont;
+    }
+    ++it;
+  }
+  return cont;
 }
 
 double stdev(AST *a) {
-
-}
-
-int productes(AST *a) {
-}
-
-/*Imprimeix el vector
-map<string, quantProductes>::iterator i = llistaCompra.begin();
-for (; i != llistaCompra.end(); ++i) {
-  quantProductes productesCompra;
-  productesCompra = (*i).second;
-  cout << (*i).first << endl;
-  quantProductes::iterator it = productesCompra.begin();
-  for (; it != productesCompra.end(); ++it) {
-    cout << (*it).first << " " << (*it).second << endl;
+  //  valor-mitjana² / nombre total
+  double mitjana = unitats(a, false) / (double) productes(a, false);
+  map<string, quantProductes>::iterator i = llistaCompra.find(a->text);
+  quantProductes sortida = (*i).second;
+  quantProductes::iterator it = sortida.begin();
+  double numerador = 0;
+  while (it != sortida.end()) {
+    numerador = numerador + pow((*it).second - (double) mitjana, 2.0);
+    ++it;
   }
-}*/
+  double desv = numerador / (double) productes(a, false);
+  cout << endl << "la desviació de la " << a->text  << " es: " << desv << endl;
+  return desv;
+}
 
 void assignacio(AST *a, quantProductes& productesCompra) {
   productesCompra[a->down->text] = atoi(a->kind.c_str());
@@ -323,7 +346,7 @@ void operacio(AST *a, quantProductes& res) {
   else if (a->kind == "AND") {
     if (res.size() > 0) {
       if (a->down->kind == "id") res = andOperacioRes(child(a, 0), res);
-      else{cout<<"aKIIIIIIIII"<<endl; res = andOperacioRes(child(a, 1), res);}
+      else res = andOperacioRes(child(a, 1), res);
     }
     else res = andOperacio(child(a,0), child(a,1));
   }
@@ -351,9 +374,9 @@ void evaluar(AST *a) {
 
 void mirarArbre(AST *a) {
   if (a == NULL) return;
-  else if (a->kind == "PRODUCTES") productes(a->right->down);
-  else if (a->kind == "UNITATS") unitats(a->right->down);
-  else if (a->kind == "DESVIACIO") stdev(a->right->down);
+  else if (a->kind == "PRODUCTES") productes(child(a, 0), true);
+  else if (a->kind == "UNITATS") unitats(child(a, 0), true);
+  else if (a->kind == "DESVIACIO") stdev(child(a, 0));
   else if (a->kind == "=") evaluar(child(a,0));
   mirarArbre(a->right);
 }
@@ -366,18 +389,18 @@ int main() {
   ANTLR(compres(&root), stdin);
   ASTPrint(root);
   mirarArbre(root->down);
-cout << "------------------------"<<endl;
-map<string, quantProductes>::iterator i = llistaCompra.begin();
-for (; i != llistaCompra.end(); ++i) {
-  quantProductes productesCompra;
-  productesCompra = (*i).second;
-  cout << (*i).first << endl;
-  quantProductes::iterator it = productesCompra.begin();
-  for (; it != productesCompra.end(); ++it) {
-    cout << (*it).first << " " << (*it).second << endl;
-  }
-  cout << "------------------------"<<endl;
-}
+                // cout << "------------------------"<<endl;
+                // map<string, quantProductes>::iterator i = llistaCompra.begin();
+                // for (; i != llistaCompra.end(); ++i) {
+                //   quantProductes productesCompra;
+                //   productesCompra = (*i).second;
+                //   cout << (*i).first << endl;
+                //   quantProductes::iterator it = productesCompra.begin();
+                //   for (; it != productesCompra.end(); ++it) {
+                //     cout << (*it).first << " " << (*it).second << endl;
+                //   }
+                //   cout << "------------------------"<<endl;
+                // }
 }
 >>
 
