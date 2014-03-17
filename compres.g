@@ -333,7 +333,12 @@ void operacio(AST *a, quantProductes& res) {
     operacio(a->right, res);
   }
   if (a->kind == "*") {
-    if (res.size() > 0) res = multOperacioRes(child(a, 0), res);
+    if (res.size() > 0) {
+      if (a->down->kind == "id" or a->down->kind == "MINUS" or a->down->kind == "AND") {
+        res = multOperacioRes(child(a,1),res);
+      }
+      else res = multOperacioRes(child(a, 0), res);
+    }
     else res = multOperacio(child(a,0), child(a,1));
   }
   else if (a->kind == "MINUS") {

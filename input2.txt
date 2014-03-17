@@ -11,5 +11,6 @@ UNITATS Compres8
 DESVIACIO Compres7
 PRODUCTES Compres7
 Compres9 = 4*(6*(Compres5 AND 2*Compres1) MINUS Compres2)
+UNITATS Compres9
 
 18 man 30 tom 360 ai 10 pome
