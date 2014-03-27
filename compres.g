@@ -121,6 +121,8 @@ void ASTPrint(AST *a)
 //Se que no feia falta utilitzar ninguna estrucura per guardar totes les assignacions de compres,
 //però he considerat que així seria més optim, per si es decideix redefinir alguna compra, aixi funciona molt millor.
 //A part també he tingut en compte més casos com per exemple posar el natural davant o darrera de una id de compra.
+
+
 int unitats(AST *a, bool imp) {
   if (imp) cout << endl << "el nombre d'unitats de la " << a->text  << " es: ";
   map<string, quantProductes>::iterator i = llistaCompra.find(a->text);

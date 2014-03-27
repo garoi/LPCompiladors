@@ -1,4 +1,4 @@
 Compres1 = [(1,mantega),(2,tomaquets),(20,aigua)]
 Compres2 = [(3,aigua),(1,tomaquets)]
-Compres3 = 3*(Compres1 MINUS Compres2) AND Compres2
+Compres3 = (Compres2 AND Compres1) MINUS Compres2
 PRODUCTES Compres3
