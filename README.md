@@ -1,8 +1,3 @@
-Compilador para interpretar una comanda de compras
-
-
-
-
 LP - Compliador llista de la compra
 =========
 
