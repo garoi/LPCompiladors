@@ -1,13 +1,4 @@
 Compres1 = [(1,mantega),(2,tomaquets),(20,aigua)]
-Compres2 = [(2,pomes)]
-Compres3 = Compres1 AND Compres2
-Compres4 = [(1,tomaquets)]
-Compres5 = Compres3 MINUS Compres4
-Compres6 = [(1,dentrific)]
-Compres7 = 3*Compres5 AND Compres6
-UNITATS Compres7
-Compres8 = 3*(Compres3 MINUS Compres2)
-UNITATS Compres8
-DESVIACIO Compres7
-PRODUCTES Compres7
-Compres9 = 4*(Compres2 MINUS 6*(Compres5 AND 2*Compres1))
+Compres2 = [(3,aigua),(1,tomaquets)]
+Compres3 = 3*(Compres1 MINUS Compres2) AND Compres2
+PRODUCTES Compres3

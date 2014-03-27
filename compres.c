@@ -18,6 +18,7 @@
 #include <iostream>
 #include "stdlib.h"
 #include <map>
+#include <cmath>
 using namespace std;
 
 // struct to store information about tokens
@@ -149,6 +150,8 @@ a=a->right;
 
 //-------------------------------------------------------------------------------------------
 //EL MEU CODI
+//Se que no feia falta utilitzar ninguna estrucura per guardar totes les assignacions de compres,
+//però he considerat que així seria més optim, per si es decideix redefinir alguna compra, aixi funciona molt millor
 int unitats(AST *a, bool imp) {
 if (imp) cout << endl << "en nombre d'unitats de la " << a->text  << " es: ";
 map<string, quantProductes>::iterator i = llistaCompra.find(a->text);
@@ -191,6 +194,7 @@ numerador = numerador + pow((*it).second - (double) mitjana, 2.0);
 ++it;
 }
 double desv = numerador / (double) productes(a, false);
+desv = sqrt(desv);
 cout << endl << "la desviació de la " << a->text  << " es: " << desv << endl;
 return desv;
 }
@@ -366,10 +370,10 @@ operacio(a->right, res);
 }
 if (a->kind == "*") {
 if (res.size() > 0) {
-/*if (a->down->kind == "id" or a->down->kind == "MINUS" or a->down->kind == "AND") {
+if (a->down->kind == "id" or a->down->kind == "MINUS" or a->down->kind == "AND") {
 res = multOperacioRes(child(a,1),res);
 }
-else*/ res = multOperacioRes(child(a, 0), res);
+else res = multOperacioRes(child(a, 0), res);
 }
 else res = multOperacio(child(a,0), child(a,1));
 }
@@ -406,7 +410,7 @@ operacio(a->right, res);
 llistaCompra[a->text] = res;
 }
 }
-else evaluar(child(a,0));
+// else evaluar(child(a,0));
 }
 
 void mirarArbre(AST *a) {
@@ -426,18 +430,6 @@ root = NULL;
 ANTLR(compres(&root), stdin);
 ASTPrint(root);
 mirarArbre(root->down);
-// cout << "------------------------"<<endl;
-// map<string, quantProductes>::iterator i = llistaCompra.begin();
-// for (; i != llistaCompra.end(); ++i) {
-//   quantProductes productesCompra;
-//   productesCompra = (*i).second;
-//   cout << (*i).first << endl;
-//   quantProductes::iterator it = productesCompra.begin();
-//   for (; it != productesCompra.end(); ++it) {
-//     cout << (*it).first << " " << (*it).second << endl;
-//   }
-//   cout << "------------------------"<<endl;
-// }
 }
 
 void
